@@ -1,11 +1,11 @@
 import kivy
-from kivy.app import App
+kivy.require("1.10.1")
+
+from kivy.app import App #base class of our app inherits from App class
 
 from kivy.uix.label import Label  #For rendering text
 from kivy.uix.gridlayout import GridLayout  # widgets
 from kivy.uix.textinput import TextInput  #input text from user 
-
-kivy.require("1.10.1")
 
 class ConnectPage(GridLayout):
 	"""docstring for ConnectPage"""
