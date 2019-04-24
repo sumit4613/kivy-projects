@@ -6,30 +6,55 @@ from kivy.app import App #base class of our app inherits from App class
 from kivy.uix.label import Label  #For rendering text
 from kivy.uix.gridlayout import GridLayout  # widgets
 from kivy.uix.textinput import TextInput  #input text from user 
+from kivy.uix.button import Button
+import os
 
 class ConnectPage(GridLayout):
 	"""docstring for ConnectPage"""
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 		self.cols = 2
+		
+		if os.path.isfile("prev_details.txt"):
+			with open("prev_details.txt", "r") as f:
+				d = f.read().split(",")
+				prev_ip = d[0]
+				prev_port = d[1]
+				prev_username = d[2]
+		else:
+			prev_ip = ""
+			prev_port = ""
+			prev_username = ""
 
 		self.add_widget(Label(text="IP:"))
 
-		self.ip = TextInput(multiline=False)
+		self.ip = TextInput(text=prev_ip,multiline=False)
 		self.add_widget(self.ip)
 
 		self.add_widget(Label(text="Port:"))
 
-		self.port = TextInput(multiline=False)
+		self.port = TextInput(text=prev_port,multiline=False)
 		self.add_widget(self.port)
 		
 		self.add_widget(Label(text="Username:"))
 
-		self.username = TextInput(multiline=False)
+		self.username = TextInput(text=prev_username,multiline=False)
 		self.add_widget(self.username)
 		
+		self.join = Button(text="Join")
+		self.join.bind(on_press=self.join_button)
+		self.add_widget(Label())
+		self.add_widget(self.join)
 		
+	def join_button(self, instance):
+		port = self.port.text
+		ip = self.ip.text
+		username = self.username.text
 
+		print(f"Attempting to join {ip}:{port} as {username}")
+
+		with open("prev_details.txt", "w") as f:
+			f.write(f"{ip},{port},{username}")
 
 class DemoApp(App):
 	def build(self):
