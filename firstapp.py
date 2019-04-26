@@ -2,16 +2,18 @@ import kivy
 kivy.require("1.10.1")
 
 from kivy.app import App #base class of our app inherits from App class
-
 from kivy.uix.label import Label  #For rendering text
 from kivy.uix.gridlayout import GridLayout  # widgets
 from kivy.uix.textinput import TextInput  #input text from user 
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.clock import Clock
+import socket_client
 import os
+import sys
 
 class ConnectPage(GridLayout):
-	"""docstring for ConnectPage"""
+	"""runs on initialization"""
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 		self.cols = 2
@@ -57,10 +59,22 @@ class ConnectPage(GridLayout):
 		info = f"Attempting to join {ip}:{port} as {username}"
 		chat_app.info_page.update_info(info)
 		chat_app.screen_manager.current = "Info"
+		Clock.schedule_once(self.connect, 1)
+
+	def connect(self, _):
+		port = int(self.port.text)
+		ip = self.ip.text
+		username = self.username.text
+
+		if not socket_client.connect(ip, port, username, show_error):
+			return 
+
+		chat_app.create_chat_app()
+		chat_app.screen_manager.current = "Chat"
 
 
 class InfoPage(GridLayout):
-	"""docstring for InfoPage"""
+	"""Simple information/error page"""
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 		self.cols = 1
@@ -74,6 +88,11 @@ class InfoPage(GridLayout):
 	def update_text_width(self, *_):
 		self.message.text_size = (self.message.width*0.9, None)
 
+class ChatPage(GridLayout):
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
+		self.cols = 1
+		self.add_widget(Label(text="Hah It Worked!!!"))
 
 
 class DemoApp(App):
@@ -91,6 +110,17 @@ class DemoApp(App):
 		self.screen_manager.add_widget(screen)
 
 		return self.screen_manager
+
+	def create_chat_app(self):
+		self.chat_page = ChatPage()
+		screen = Screen(name="Chat")
+		screen.add_widget(self.chat_page)
+		self.screen_manager.add_widget(screen)
+
+def show_error(message):
+	chat_app.info_page.update_info(message)
+	chat_app.screen_manager.current = "Info"
+	Clock.schedule_once(sys.exit, 10)
 
 
 if __name__ == '__main__':
